@@ -20,6 +20,17 @@ import {
   Alert,
   Stack,
 } from '@mui/material';
+import {
+  Group as GroupIcon,
+  Star as StarIcon,
+  CheckCircle as CheckCircleIcon,
+  HourglassEmpty as HourglassEmptyIcon,
+  Style as StyleIcon,
+  Visibility as VisibilityIcon,
+  Refresh as RefreshIcon,
+  BarChart as BarChartIcon,
+  Link as LinkIcon,
+} from '@mui/icons-material';
 
 const CARDS = ['0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 
@@ -214,25 +225,38 @@ export default function RoomPage({
           {/* 参加者リスト */}
           <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
             <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                👥 参加者 ({participants.length})
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <GroupIcon />
+                <Typography variant="h6">
+                  参加者 ({participants.length})
+                </Typography>
+              </Box>
               <List dense>
                 {participants.map((p) => (
                   <ListItem key={p.id}>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {p.id === facilitatorId && <span>👑</span>}
+                          {p.id === facilitatorId && <StarIcon fontSize="small" sx={{ color: 'warning.main' }} />}
                           <span>{p.nickname}</span>
                         </Box>
                       }
                       secondary={
-                        isRevealed
-                          ? votes[p.id] || '-'
-                          : p.hasVoted
-                          ? '✅'
-                          : '⏳'
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {isRevealed ? (
+                            votes[p.id] || '-'
+                          ) : p.hasVoted ? (
+                            <>
+                              <CheckCircleIcon fontSize="small" sx={{ color: 'success.main' }} />
+                              <span>投票済み</span>
+                            </>
+                          ) : (
+                            <>
+                              <HourglassEmptyIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                              <span>投票待ち</span>
+                            </>
+                          )}
+                        </Box>
                       }
                     />
                   </ListItem>
@@ -252,9 +276,12 @@ export default function RoomPage({
           {/* カード選択 */}
           <Box sx={{ width: { xs: '100%', md: '66.666%' } }}>
             <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                🎴 カードを選択
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <StyleIcon />
+                <Typography variant="h6">
+                  カードを選択
+                </Typography>
+              </Box>
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' }, gap: 1 }}>
                 {CARDS.map((card) => (
                   <Box key={card}>
@@ -315,15 +342,17 @@ export default function RoomPage({
                 variant="contained"
                 onClick={handleReveal}
                 disabled={isRevealed}
+                startIcon={<VisibilityIcon />}
               >
-                🔍 カードを公開
+                カードを公開
               </Button>
               <Button
                 variant="contained"
                 color="inherit"
                 onClick={handleReset}
+                startIcon={<RefreshIcon />}
               >
-                🔄 リセット
+                リセット
               </Button>
             </Box>
           </Paper>
@@ -332,9 +361,12 @@ export default function RoomPage({
         {/* 結果表示 */}
         {isRevealed && Object.keys(votes).length > 0 && (
           <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              📊 投票結果
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <BarChartIcon />
+              <Typography variant="h6">
+                投票結果
+              </Typography>
+            </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
               {participants.map((p) => (
                 <Box key={p.id}>
@@ -357,8 +389,9 @@ export default function RoomPage({
         {/* 招待リンク */}
         <Paper sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <LinkIcon fontSize="small" color="action" />
             <Typography variant="body2" color="text.secondary">
-              📎 招待リンク:
+              招待リンク:
             </Typography>
             <Box
               component="code"
