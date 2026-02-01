@@ -94,15 +94,18 @@ module.exports = async function (context, req) {
             },
           });
 
-          // 全員に参加通知
-          await client.group(roomId).sendToAll({
-            type: 'userJoined',
-            user: {
-              id: userId,
-              nickname: message.nickname,
-              hasVoted: false,
+          // 他の参加者に参加通知（自分以外）
+          await client.group(roomId).sendToAll(
+            {
+              type: 'userJoined',
+              user: {
+                id: userId,
+                nickname: message.nickname,
+                hasVoted: false,
+              },
             },
-          });
+            { filter: `userId ne '${userId}'` }
+          );
           break;
 
         case 'vote':

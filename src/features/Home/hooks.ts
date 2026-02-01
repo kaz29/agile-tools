@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
+import { getAllRoomHistories } from '@/utils/roomStorage';
 
 const TEAM_NAME_KEY = 'planning-poker:team-name';
 const NICKNAME_KEY = 'planning-poker:nickname';
@@ -25,6 +26,7 @@ export function useHomeState() {
   const [teamName, setTeamName] = useState('');
   const [roomIdInput, setRoomIdInput] = useState('');
   const [joinNickname, setJoinNickname] = useState('');
+  const [hasHistories, setHasHistories] = useState(false);
 
   // LocalStorageからチーム名とニックネームを読み込み
   useEffect(() => {
@@ -38,6 +40,10 @@ export function useHomeState() {
       if (savedNickname) {
         setNickname(savedNickname);
       }
+
+      // 履歴の存在チェック
+      const histories = getAllRoomHistories();
+      setHasHistories(histories.length > 0);
     }
   }, []);
 
@@ -104,6 +110,7 @@ export function useHomeState() {
     setRoomIdInput,
     joinNickname,
     setJoinNickname,
+    hasHistories,
     handleCreateRoom,
     handleJoinRoom,
   };

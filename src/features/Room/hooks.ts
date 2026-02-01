@@ -91,7 +91,12 @@ export function useRoomState(roomId: string) {
 
       case 'userJoined':
         setParticipants((prev) => {
+          // 既に存在する場合は追加しない
           if (prev.find(p => p.id === message.user.id)) {
+            return prev;
+          }
+          // 自分自身の join メッセージの場合もスキップ（roomStateで既に追加されているため）
+          if (userInfo && message.user.id === userInfo.userId) {
             return prev;
           }
           return [...prev, message.user];

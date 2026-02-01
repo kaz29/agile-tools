@@ -9,8 +9,10 @@ import {
   AppBar,
   Toolbar,
   Paper,
+  Alert,
 } from '@mui/material';
-import { Style as StyleIcon, AddCircle as AddCircleIcon } from '@mui/icons-material';
+import { Style as StyleIcon, AddCircle as AddCircleIcon, History as HistoryIcon } from '@mui/icons-material';
+import Link from 'next/link';
 import { useHomeState } from './hooks';
 
 export function HomePage() {
@@ -19,6 +21,7 @@ export function HomePage() {
     setNickname,
     teamName,
     setTeamName,
+    hasHistories,
     handleCreateRoom,
   } = useHomeState();
 
@@ -42,6 +45,28 @@ export function HomePage() {
             プランニングポーカーでチームの合意形成をサポートします
           </Typography>
         </Box>
+
+        {/* 過去のプランニングへのリンク */}
+        {hasHistories && (
+          <Alert
+            severity="info"
+            icon={<HistoryIcon />}
+            sx={{ mb: 3 }}
+            action={
+              <Button
+                component={Link}
+                href="/history"
+                color="inherit"
+                size="small"
+                variant="outlined"
+              >
+                一覧を見る
+              </Button>
+            }
+          >
+            過去のプランニング履歴があります
+          </Alert>
+        )}
 
         {/* 使い方の説明 */}
         <Paper sx={{ p: 3, mb: 3, bgcolor: 'primary.50' }}>
