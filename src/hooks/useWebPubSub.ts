@@ -32,7 +32,8 @@ export function useWebPubSub({
     if (!enabled || !userId) return;
 
     try {
-      const res = await fetch(`/api/negotiate?roomId=${roomId}&userId=${userId}`);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+      const res = await fetch(`${apiBaseUrl}/negotiate?roomId=${roomId}&userId=${userId}`);
       if (!res.ok) throw new Error('Failed to negotiate');
       const { url } = await res.json();
 

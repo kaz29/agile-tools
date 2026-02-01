@@ -9,7 +9,6 @@ import {
   AccordionSummary,
   AccordionDetails,
   Chip,
-  Grid,
   Link as MuiLink,
 } from '@mui/material';
 import {
@@ -109,27 +108,36 @@ export function VotingHistory({ history }: VotingHistoryProps) {
                 </Box>
               )}
 
-              <Grid container spacing={2}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: 'repeat(2, 1fr)',
+                    sm: 'repeat(3, 1fr)',
+                    md: 'repeat(4, 1fr)',
+                  },
+                  gap: 2,
+                }}
+              >
                 {Object.entries(item.votes).map(([userId, vote]) => (
-                  <Grid item xs={6} sm={4} md={3} key={userId}>
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 1,
-                        bgcolor: 'grey.100',
-                        textAlign: 'center',
-                      }}
-                    >
-                      <Typography variant="caption" color="text.secondary">
-                        {item.participantNames[userId] || 'Unknown'}
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        {vote}
-                      </Typography>
-                    </Box>
-                  </Grid>
+                  <Box
+                    key={userId}
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 1,
+                      bgcolor: 'grey.100',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {item.participantNames[userId] || 'Unknown'}
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                      {vote}
+                    </Typography>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
               <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
                 {average && (

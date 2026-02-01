@@ -1,0 +1,24 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": ["/images/*.{png,jpg,gif,ico}", "/css/*", "/_next/*", "/api/*"]
+  },
+  "platform": {
+    "apiRuntime": "node:18"
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/room/*",
+      "rewrite": "/room/index.html"
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/404.html"
+    }
+  }
+}
