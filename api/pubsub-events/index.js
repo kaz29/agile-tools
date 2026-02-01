@@ -70,6 +70,25 @@ module.exports = async function (context, req) {
             roomState.facilitatorId = userId;
           }
 
+          // 参加したユーザーに現在のルーム状態を送信
+          await client.sendToConnection(connectionId, {
+            type: 'roomState',
+            state: {
+              participants: Array.from(roomState.participants.entries()).map(
+                ([id, p]) => ({
+                  id,
+                  nickname: p.nickname,
+                  hasVoted: p.hasVoted,
+                })
+              ),
+              votes: roomState.isRevealed
+                ? Object.fromEntries(roomState.votes)
+                : {},
+              isRevealed: roomState.isRevealed,
+              facilitatorId: roomState.facilitatorId,
+            },
+          });
+
           // 全員に参加通知
           await client.group(roomId).sendToAll({
             type: 'userJoined',

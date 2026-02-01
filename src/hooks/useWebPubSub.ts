@@ -70,11 +70,16 @@ export function useWebPubSub({
           }
 
           // Web PubSubプロトコルメッセージの処理
-          if (data.type === 'message' && data.from === 'group') {
-            console.log('[WS] Group message received:', data.data);
-            onMessage(data.data);
+          if (data.type === 'message') {
+            if (data.from === 'group') {
+              console.log('[WS] Group message received:', data.data);
+              onMessage(data.data);
+            } else if (data.from === 'server') {
+              console.log('[WS] Server message received:', data.data);
+              onMessage(data.data);
+            }
           } else if (data.type !== 'ack' && data.type !== 'system') {
-            console.log('[WS] Message did not match group message criteria');
+            console.log('[WS] Message did not match message criteria');
           }
         } catch (e) {
           console.error('Failed to parse message:', e);

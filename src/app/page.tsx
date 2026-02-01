@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { nanoid } from 'nanoid';
+import {
+  Container,
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Stack,
+} from '@mui/material';
 
 export default function HomePage() {
   const router = useRouter();
@@ -50,81 +60,93 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold text-center mb-12">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(to bottom, #e3f2fd, #ffffff)',
+        py: 8,
+      }}
+    >
+      <Container maxWidth="md">
+        <Typography variant="h3" component="h1" align="center" gutterBottom sx={{ mb: 6, fontWeight: 'bold' }}>
           プランニングポーカー
-        </h1>
+        </Typography>
 
-        <div className="max-w-2xl mx-auto grid md:grid-cols-2 gap-8">
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={4}>
           {/* ルーム作成 */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">ルームを作成</h2>
-            <form onSubmit={handleCreateRoom}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  ニックネーム
-                </label>
-                <input
-                  type="text"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="例: 山田"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  maxLength={20}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={!nickname.trim()}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                作成する
-              </button>
-            </form>
-          </div>
+          <Box sx={{ flex: 1 }}>
+            <Card elevation={3}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
+                  ルームを作成
+                </Typography>
+                <Box component="form" onSubmit={handleCreateRoom}>
+                  <TextField
+                    fullWidth
+                    label="ニックネーム"
+                    placeholder="例: 山田"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    inputProps={{ maxLength: 20 }}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!nickname.trim()}
+                    sx={{ py: 1.5 }}
+                  >
+                    作成する
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
 
           {/* ルーム参加 */}
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">ルームに参加</h2>
-            <form onSubmit={handleJoinRoom}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  ルームID
-                </label>
-                <input
-                  type="text"
-                  value={roomIdInput}
-                  onChange={(e) => setRoomIdInput(e.target.value)}
-                  placeholder="例: abc123"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  maxLength={10}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  ニックネーム
-                </label>
-                <input
-                  type="text"
-                  value={joinNickname}
-                  onChange={(e) => setJoinNickname(e.target.value)}
-                  placeholder="例: 鈴木"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  maxLength={20}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={!roomIdInput.trim() || !joinNickname.trim()}
-                className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                参加する
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </main>
+          <Box sx={{ flex: 1 }}>
+            <Card elevation={3}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" component="h2" gutterBottom sx={{ mb: 2 }}>
+                  ルームに参加
+                </Typography>
+                <Box component="form" onSubmit={handleJoinRoom}>
+                  <TextField
+                    fullWidth
+                    label="ルームID"
+                    placeholder="例: abc123"
+                    value={roomIdInput}
+                    onChange={(e) => setRoomIdInput(e.target.value)}
+                    inputProps={{ maxLength: 10 }}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="ニックネーム"
+                    placeholder="例: 鈴木"
+                    value={joinNickname}
+                    onChange={(e) => setJoinNickname(e.target.value)}
+                    inputProps={{ maxLength: 20 }}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    disabled={!roomIdInput.trim() || !joinNickname.trim()}
+                    sx={{ py: 1.5 }}
+                  >
+                    参加する
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
+        </Stack>
+      </Container>
+    </Box>
   );
 }

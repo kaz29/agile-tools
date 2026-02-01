@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
+import { CssBaseline } from '@mui/material';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -13,7 +15,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className="antialiased">{children}</body>
+      <body>
+        <AppRouterCacheProvider>
+          <CssBaseline />
+          {children}
+        </AppRouterCacheProvider>
+      </body>
     </html>
   );
 }

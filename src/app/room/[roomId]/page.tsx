@@ -3,6 +3,23 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import { useWebPubSub } from '@/hooks/useWebPubSub';
 import type { RoomState, ServerMessage, Participant } from '@/types';
+import {
+  Container,
+  Box,
+  Typography,
+  Paper,
+  Card,
+  CardActionArea,
+  CardContent,
+  TextField,
+  Button,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  Alert,
+  Stack,
+} from '@mui/material';
 
 const CARDS = ['0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 
@@ -122,13 +139,25 @@ export default function RoomPage({
 
   if (!userInfo) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow p-6 max-w-md w-full">
-          <h2 className="text-xl font-bold mb-4">ルームに参加</h2>
-          <p className="text-gray-600 mb-4">
+      <Box
+        sx={{
+          minHeight: '100vh',
+          bgcolor: 'grey.50',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+        }}
+      >
+        <Paper sx={{ p: 3, maxWidth: 'md', width: '100%' }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            ルームに参加
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             ニックネームを入力してください
-          </p>
-          <form
+          </Typography>
+          <Box
+            component="form"
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
@@ -141,168 +170,218 @@ export default function RoomPage({
               }
             }}
           >
-            <input
-              type="text"
+            <TextField
+              fullWidth
               name="nickname"
+              label="ニックネーム"
               placeholder="ニックネーム"
-              className="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              maxLength={20}
+              inputProps={{ maxLength: 20 }}
               required
+              sx={{ mb: 2 }}
             />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-            >
+            <Button fullWidth type="submit" variant="contained" size="large">
               参加する
-            </button>
-          </form>
-        </div>
-      </main>
+            </Button>
+          </Box>
+        </Paper>
+      </Box>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', p: 2 }}>
+      <Container maxWidth="lg">
         {/* ヘッダー */}
-        <div className="bg-white rounded-lg shadow p-4 mb-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-bold">ルーム: {roomId}</h1>
-            <div className="flex items-center gap-2">
-              <span
-                className={`px-2 py-1 rounded text-sm ${
-                  isConnected
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}
-              >
-                {isConnected ? '接続済み' : '接続中...'}
-              </span>
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="h6" component="h1">
+              ルーム: {roomId}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Chip
+                label={isConnected ? '接続済み' : '接続中...'}
+                color={isConnected ? 'success' : 'warning'}
+                size="small"
+              />
               {isHost && (
-                <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
-                  ホスト
-                </span>
+                <Chip label="ホスト" color="primary" size="small" />
               )}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Paper>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-4">
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
           {/* 参加者リスト */}
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="font-bold mb-3">
-              👥 参加者 ({participants.length})
-            </h2>
-            <ul className="space-y-2">
-              {participants.map((p) => (
-                <li key={p.id} className="flex items-center gap-2">
-                  {p.id === facilitatorId && <span>👑</span>}
-                  <span className="flex-1">{p.nickname}</span>
-                  <span>
-                    {isRevealed
-                      ? votes[p.id] || '-'
-                      : p.hasVoted
-                      ? '✅'
-                      : '⏳'}
-                  </span>
-                </li>
-              ))}
-              {participants.length === 0 && (
-                <li className="text-gray-500 text-sm">参加者を待っています...</li>
-              )}
-            </ul>
-          </div>
+          <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                👥 参加者 ({participants.length})
+              </Typography>
+              <List dense>
+                {participants.map((p) => (
+                  <ListItem key={p.id}>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {p.id === facilitatorId && <span>👑</span>}
+                          <span>{p.nickname}</span>
+                        </Box>
+                      }
+                      secondary={
+                        isRevealed
+                          ? votes[p.id] || '-'
+                          : p.hasVoted
+                          ? '✅'
+                          : '⏳'
+                      }
+                    />
+                  </ListItem>
+                ))}
+                {participants.length === 0 && (
+                  <ListItem>
+                    <ListItemText
+                      primary="参加者を待っています..."
+                      primaryTypographyProps={{ color: 'text.secondary', fontSize: 'small' }}
+                    />
+                  </ListItem>
+                )}
+              </List>
+            </Paper>
+          </Box>
 
           {/* カード選択 */}
-          <div className="md:col-span-2 bg-white rounded-lg shadow p-4">
-            <h2 className="font-bold mb-3">🎴 カードを選択</h2>
-            <div className="grid grid-cols-5 gap-2">
-              {CARDS.map((card) => (
-                <button
-                  key={card}
-                  onClick={() => handleCardSelect(card)}
-                  disabled={isRevealed}
-                  className={`
-                    aspect-[2/3] rounded-lg border-2 text-xl font-bold
-                    transition-all hover:scale-105
-                    ${
-                      selectedCard === card
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 scale-105'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }
-                    ${
-                      isRevealed
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer'
-                    }
-                  `}
-                >
-                  {card}
-                </button>
-              ))}
-            </div>
-            {selectedCard && !isRevealed && (
-              <div className="mt-4 text-center text-sm text-gray-600">
-                選択: <span className="font-bold text-blue-600">{selectedCard}</span>
-              </div>
-            )}
-          </div>
-        </div>
+          <Box sx={{ width: { xs: '100%', md: '66.666%' } }}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                🎴 カードを選択
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' }, gap: 1 }}>
+                {CARDS.map((card) => (
+                  <Box key={card}>
+                    <Card
+                      elevation={selectedCard === card ? 8 : 1}
+                      sx={{
+                        aspectRatio: '2/3',
+                        border: selectedCard === card ? 2 : 1,
+                        borderColor: selectedCard === card ? 'primary.main' : 'grey.300',
+                        bgcolor: selectedCard === card ? 'primary.50' : 'white',
+                        opacity: isRevealed ? 0.5 : 1,
+                        transition: 'all 0.2s',
+                        '&:hover': !isRevealed ? {
+                          transform: 'scale(1.05)',
+                          borderColor: 'grey.400',
+                        } : {},
+                      }}
+                    >
+                      <CardActionArea
+                        onClick={() => handleCardSelect(card)}
+                        disabled={isRevealed}
+                        sx={{
+                          height: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography
+                          variant="h4"
+                          component="div"
+                          sx={{
+                            fontWeight: 'bold',
+                            color: selectedCard === card ? 'primary.main' : 'text.primary',
+                          }}
+                        >
+                          {card}
+                        </Typography>
+                      </CardActionArea>
+                    </Card>
+                  </Box>
+                ))}
+              </Box>
+              {selectedCard && !isRevealed && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  選択: <strong>{selectedCard}</strong>
+                </Alert>
+              )}
+            </Paper>
+          </Box>
+        </Stack>
 
         {/* ホスト用コントロール */}
         {isHost && (
-          <div className="bg-white rounded-lg shadow p-4 mb-4">
-            <div className="flex flex-wrap gap-2">
-              <button
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
                 onClick={handleReveal}
                 disabled={isRevealed}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 🔍 カードを公開
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="contained"
+                color="inherit"
                 onClick={handleReset}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
               >
                 🔄 リセット
-              </button>
-            </div>
-          </div>
+              </Button>
+            </Box>
+          </Paper>
         )}
 
         {/* 結果表示 */}
         {isRevealed && Object.keys(votes).length > 0 && (
-          <div className="bg-white rounded-lg shadow p-4 mb-4">
-            <h2 className="font-bold mb-3">📊 投票結果</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              📊 投票結果
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
               {participants.map((p) => (
-                <div key={p.id} className="border rounded p-2 text-center">
-                  <div className="text-sm text-gray-600">{p.nickname}</div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {votes[p.id] || '-'}
-                  </div>
-                </div>
+                <Box key={p.id}>
+                  <Card variant="outlined">
+                    <CardContent sx={{ textAlign: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {p.nickname}
+                      </Typography>
+                      <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
+                        {votes[p.id] || '-'}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Box>
               ))}
-            </div>
-          </div>
+            </Box>
+          </Paper>
         )}
 
         {/* 招待リンク */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">📎 招待リンク:</span>
-            <code className="flex-1 bg-gray-100 px-2 py-1 rounded text-sm truncate">
-              {typeof window !== 'undefined' ? window.location.href : ''}
-            </code>
-            <button
-              onClick={handleCopyLink}
-              className="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300"
+        <Paper sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Typography variant="body2" color="text.secondary">
+              📎 招待リンク:
+            </Typography>
+            <Box
+              component="code"
+              sx={{
+                flex: 1,
+                bgcolor: 'grey.100',
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                fontSize: 'small',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
             >
+              {typeof window !== 'undefined' ? window.location.href : ''}
+            </Box>
+            <Button variant="outlined" size="small" onClick={handleCopyLink}>
               コピー
-            </button>
-          </div>
-        </div>
-      </div>
-    </main>
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 }
