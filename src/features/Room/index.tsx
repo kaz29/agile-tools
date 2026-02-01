@@ -9,6 +9,8 @@ import { HostControls } from './components/HostControls';
 import { VotingResults } from './components/VotingResults';
 import { JoinRoomForm } from './components/JoinRoomForm';
 import { RoomSkeleton } from './components/RoomSkeleton';
+import { CurrentStory } from './components/CurrentStory';
+import { VotingHistory } from './components/VotingHistory';
 
 interface RoomPageProps {
   roomId: string;
@@ -27,11 +29,17 @@ export function RoomPage({ roomId }: RoomPageProps) {
     facilitatorId,
     allVotedNotified,
     teamName,
+    story,
+    storyUrl,
+    history,
     handleCardSelect,
     handleReveal,
     handleReset,
     handleCopyLink,
     handleJoinRoom,
+    handleSetStory,
+    handleClearStory,
+    handleSetEstimate,
   } = useRoomState(roomId);
 
   const allVoted = participants.length > 0 && participants.every((p) => p.hasVoted);
@@ -54,6 +62,15 @@ export function RoomPage({ roomId }: RoomPageProps) {
         onCopyLink={handleCopyLink}
       />
       <Container maxWidth="lg" sx={{ py: 2 }}>
+        {/* 現在のストーリー */}
+        <CurrentStory
+          story={story}
+          storyUrl={storyUrl}
+          isHost={isHost}
+          onClear={handleClearStory}
+          onSetStory={handleSetStory}
+        />
+
         <Paper sx={{ mb: 2 }}>
           {/* 参加者リスト */}
           <ParticipantsList
@@ -76,6 +93,8 @@ export function RoomPage({ roomId }: RoomPageProps) {
           participants={participants}
           votes={votes}
           isRevealed={isRevealed}
+          isHost={isHost}
+          onSetEstimate={handleSetEstimate}
         />
 
         {/* ホスト用コントロール */}
@@ -87,6 +106,9 @@ export function RoomPage({ roomId }: RoomPageProps) {
             onReset={handleReset}
           />
         )}
+
+        {/* 投票履歴（ホストのみ） */}
+        {isHost && <VotingHistory history={history} />}
       </Container>
     </Box>
   );

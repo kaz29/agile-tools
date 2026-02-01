@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Box, Paper, Typography, TextField, Button } from '@mui/material';
 
 interface JoinRoomFormProps {
@@ -6,11 +7,27 @@ interface JoinRoomFormProps {
 }
 
 export function JoinRoomForm({ roomId, onJoin }: JoinRoomFormProps) {
+  const [defaultNickname, setDefaultNickname] = useState('');
+
+  // localStorageから以前のニックネームを読み込み
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('poker:nickname');
+      if (saved) {
+        setDefaultNickname(saved);
+      }
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const nickname = formData.get('nickname') as string;
     if (nickname.trim()) {
+      // localStorageにニックネームを保存
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('poker:nickname', nickname.trim());
+      }
       onJoin(nickname.trim());
     }
   };
@@ -39,8 +56,10 @@ export function JoinRoomForm({ roomId, onJoin }: JoinRoomFormProps) {
             name="nickname"
             label="ニックネーム"
             placeholder="ニックネーム"
+            defaultValue={defaultNickname}
             slotProps={{ htmlInput: { maxLength: 20 } }}
             required
+            autoFocus
             sx={{ mb: 2 }}
           />
           <Button fullWidth type="submit" variant="contained" size="large">

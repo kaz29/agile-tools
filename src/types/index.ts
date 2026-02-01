@@ -5,8 +5,7 @@ export type ClientMessage =
   | { type: 'vote'; userId: string; value: string }
   | { type: 'reveal' }
   | { type: 'reset' }
-  | { type: 'setStory'; story: string }
-  | { type: 'setEstimate'; estimate: string };
+  | { type: 'setStory'; story: string; storyUrl?: string };
 
 // サーバー -> クライアント
 export type ServerMessage =
@@ -16,12 +15,12 @@ export type ServerMessage =
   | { type: 'voted'; userId: string }
   | { type: 'revealed'; votes: Record<string, string> }
   | { type: 'reset' }
-  | { type: 'storyUpdated'; story: string }
-  | { type: 'estimateSet'; estimate: string };
+  | { type: 'storyUpdated'; story: string; storyUrl?: string };
 
 export interface RoomState {
   roomId: string;
   story: string | null;
+  storyUrl: string | null;
   participants: Participant[];
   votes: Record<string, string>; // userId -> カード値（公開後のみ）
   isRevealed: boolean;
@@ -47,4 +46,21 @@ export interface VoteRecord {
   finalEstimate: string;
   participants: number;
   votedAt: Date;
+}
+
+export interface VotingHistoryItem {
+  id: string;
+  story: string;
+  storyUrl?: string;
+  votes: Record<string, string>; // userId -> vote value
+  participantNames: Record<string, string>; // userId -> nickname
+  estimate?: string;
+  votedAt: string; // ISO timestamp
+}
+
+export interface RoomHistory {
+  roomId: string;
+  teamName?: string;
+  createdAt: string; // ISO timestamp
+  votingHistory: VotingHistoryItem[];
 }

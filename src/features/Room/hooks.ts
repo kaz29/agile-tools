@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useWebPubSub } from '@/hooks/useWebPubSub';
-import type { ServerMessage, Participant } from '@/types';
+import type { ServerMessage, Participant, VotingHistoryItem, RoomHistory } from '@/types';
 
 interface UserInfo {
   userId: string;
@@ -20,6 +20,38 @@ export function useRoomState(roomId: string) {
   const [facilitatorId, setFacilitatorId] = useState<string>('');
   const [allVotedNotified, setAllVotedNotified] = useState(false);
   const [teamName, setTeamName] = useState<string | undefined>(undefined);
+  const [story, setStory] = useState<string | null>(null);
+  const [storyUrl, setStoryUrl] = useState<string | null>(null);
+  const [history, setHistory] = useState<VotingHistoryItem[]>([]);
+
+  // localStorageから履歴を読み込み（ホストのみ）
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isHost) {
+      const saved = localStorage.getItem(`room:${roomId}:history`);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+
+          // 旧形式（配列）からの移行処理
+          if (Array.isArray(data)) {
+            const roomHistory: RoomHistory = {
+              roomId,
+              teamName: teamName,
+              createdAt: new Date().toISOString(),
+              votingHistory: data,
+            };
+            localStorage.setItem(`room:${roomId}:history`, JSON.stringify(roomHistory));
+            setHistory(data);
+          } else if (data.votingHistory) {
+            // 新形式（RoomHistory）
+            setHistory(data.votingHistory);
+          }
+        } catch (e) {
+          console.error('Failed to parse history:', e);
+        }
+      }
+    }
+  }, [roomId, isHost, teamName]);
 
   // セッションストレージからユーザー情報を取得
   useEffect(() => {
@@ -53,6 +85,8 @@ export function useRoomState(roomId: string) {
         setVotes(message.state.votes);
         setIsRevealed(message.state.isRevealed);
         setFacilitatorId(message.state.facilitatorId);
+        setStory(message.state.story);
+        setStoryUrl(message.state.storyUrl);
         break;
 
       case 'userJoined':
@@ -79,6 +113,67 @@ export function useRoomState(roomId: string) {
       case 'revealed':
         setIsRevealed(true);
         setVotes(message.votes);
+
+        // ホストの場合、履歴に保存
+        if (isHost && userInfo) {
+          const participantNames: Record<string, string> = {};
+          participants.forEach(p => {
+            participantNames[p.id] = p.nickname;
+          });
+
+          const historyItem: VotingHistoryItem = {
+            id: crypto.randomUUID(),
+            story: story || '(ストーリー未設定)',
+            storyUrl: storyUrl || undefined,
+            votes: message.votes,
+            participantNames,
+            votedAt: new Date().toISOString(),
+          };
+
+          setHistory(prev => {
+            const newHistory = [...prev, historyItem];
+            // RoomHistory形式でlocalStorageに保存
+            if (typeof window !== 'undefined') {
+              const saved = localStorage.getItem(`room:${roomId}:history`);
+              let roomHistory: RoomHistory;
+
+              if (saved) {
+                try {
+                  const data = JSON.parse(saved);
+                  if (Array.isArray(data)) {
+                    // 旧形式からの移行
+                    roomHistory = {
+                      roomId,
+                      teamName,
+                      createdAt: new Date().toISOString(),
+                      votingHistory: newHistory,
+                    };
+                  } else {
+                    // 新形式の更新
+                    roomHistory = { ...data, votingHistory: newHistory, teamName };
+                  }
+                } catch {
+                  roomHistory = {
+                    roomId,
+                    teamName,
+                    createdAt: new Date().toISOString(),
+                    votingHistory: newHistory,
+                  };
+                }
+              } else {
+                roomHistory = {
+                  roomId,
+                  teamName,
+                  createdAt: new Date().toISOString(),
+                  votingHistory: newHistory,
+                };
+              }
+
+              localStorage.setItem(`room:${roomId}:history`, JSON.stringify(roomHistory));
+            }
+            return newHistory;
+          });
+        }
         break;
 
       case 'reset':
@@ -86,12 +181,19 @@ export function useRoomState(roomId: string) {
         setVotes({});
         setSelectedCard(null);
         setAllVotedNotified(false);
+        setStory(null);
+        setStoryUrl(null);
         setParticipants((prev) =>
           prev.map((p) => ({ ...p, hasVoted: false }))
         );
         break;
+
+      case 'storyUpdated':
+        setStory(message.story || null);
+        setStoryUrl(message.storyUrl || null);
+        break;
     }
-  }, []);
+  }, [enqueueSnackbar, isHost, userInfo, participants, story, storyUrl, roomId]);
 
   const { isConnected, send } = useWebPubSub({
     roomId,
@@ -153,6 +255,79 @@ export function useRoomState(roomId: string) {
     }
   }, [roomId]);
 
+  // ストーリー設定
+  const handleSetStory = useCallback((story: string, storyUrl: string) => {
+    if (!isHost) return;
+    send({ type: 'setStory', story, storyUrl });
+  }, [isHost, send]);
+
+  // ストーリークリア
+  const handleClearStory = useCallback(() => {
+    if (!isHost) return;
+    send({ type: 'setStory', story: '', storyUrl: '' });
+  }, [isHost, send]);
+
+  // 見積もり設定
+  const handleSetEstimate = useCallback((estimate: string) => {
+    if (!isHost || !isRevealed) return;
+
+    // 最新の履歴に見積もりを追加
+    setHistory(prev => {
+      if (prev.length === 0) return prev;
+
+      const newHistory = [...prev];
+      const latest = { ...newHistory[newHistory.length - 1] };
+      latest.estimate = estimate;
+      newHistory[newHistory.length - 1] = latest;
+
+      // RoomHistory形式でlocalStorageに保存
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(`room:${roomId}:history`);
+        let roomHistory: RoomHistory;
+
+        if (saved) {
+          try {
+            const data = JSON.parse(saved);
+            if (Array.isArray(data)) {
+              // 旧形式からの移行
+              roomHistory = {
+                roomId,
+                teamName,
+                createdAt: new Date().toISOString(),
+                votingHistory: newHistory,
+              };
+            } else {
+              // 新形式の更新
+              roomHistory = { ...data, votingHistory: newHistory, teamName };
+            }
+          } catch {
+            roomHistory = {
+              roomId,
+              teamName,
+              createdAt: new Date().toISOString(),
+              votingHistory: newHistory,
+            };
+          }
+        } else {
+          roomHistory = {
+            roomId,
+            teamName,
+            createdAt: new Date().toISOString(),
+            votingHistory: newHistory,
+          };
+        }
+
+        localStorage.setItem(`room:${roomId}:history`, JSON.stringify(roomHistory));
+      }
+
+      return newHistory;
+    });
+
+    enqueueSnackbar(`見積もりを ${estimate} に設定しました`, {
+      variant: 'success',
+    });
+  }, [isHost, isRevealed, roomId, teamName, enqueueSnackbar]);
+
   return {
     isLoading,
     userInfo,
@@ -166,10 +341,16 @@ export function useRoomState(roomId: string) {
     facilitatorId,
     allVotedNotified,
     teamName,
+    story,
+    storyUrl,
+    history,
     handleCardSelect,
     handleReveal,
     handleReset,
     handleCopyLink,
     handleJoinRoom,
+    handleSetStory,
+    handleClearStory,
+    handleSetEstimate,
   };
 }

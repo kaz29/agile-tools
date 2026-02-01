@@ -1,17 +1,31 @@
-import { Box, Paper, Typography, Chip, Divider } from '@mui/material';
-import { BarChart as BarChartIcon, Functions as FunctionsIcon, TrendingUp as TrendingUpIcon } from '@mui/icons-material';
+import { useState } from 'react';
+import { Box, Paper, Typography, Chip, Divider, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { BarChart as BarChartIcon, Functions as FunctionsIcon, TrendingUp as TrendingUpIcon, Save as SaveIcon } from '@mui/icons-material';
 import type { Participant } from '@/types';
 
 interface VotingResultsProps {
   participants: Participant[];
   votes: Record<string, string>;
   isRevealed: boolean;
+  isHost?: boolean;
+  onSetEstimate?: (estimate: string) => void;
 }
 
-export function VotingResults({ participants, votes, isRevealed }: VotingResultsProps) {
+export function VotingResults({ participants, votes, isRevealed, isHost, onSetEstimate }: VotingResultsProps) {
+  const [estimateDialogOpen, setEstimateDialogOpen] = useState(false);
+  const [estimateValue, setEstimateValue] = useState('');
+
   if (!isRevealed || Object.keys(votes).length === 0) {
     return null;
   }
+
+  const handleSetEstimate = () => {
+    if (estimateValue.trim() && onSetEstimate) {
+      onSetEstimate(estimateValue.trim());
+      setEstimateDialogOpen(false);
+      setEstimateValue('');
+    }
+  };
 
   // 統計情報の計算
   const voteValues = Object.values(votes).filter(v => v);
@@ -129,6 +143,44 @@ export function VotingResults({ participants, votes, isRevealed }: VotingResults
           );
         })}
       </Box>
+
+      {/* ホスト用：見積もり設定ボタン */}
+      {isHost && onSetEstimate && (
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<SaveIcon />}
+            onClick={() => setEstimateDialogOpen(true)}
+            size="large"
+          >
+            見積もりを確定
+          </Button>
+        </Box>
+      )}
+
+      {/* 見積もり入力ダイアログ */}
+      <Dialog open={estimateDialogOpen} onClose={() => setEstimateDialogOpen(false)}>
+        <DialogTitle>見積もりを確定</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="見積もり"
+            fullWidth
+            value={estimateValue}
+            onChange={(e) => setEstimateValue(e.target.value)}
+            placeholder={average || modes[0] || ''}
+            helperText="平均値や最頻値を参考に見積もりを入力してください"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEstimateDialogOpen(false)}>キャンセル</Button>
+          <Button onClick={handleSetEstimate} variant="contained" disabled={!estimateValue}>
+            確定
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

@@ -10,6 +10,8 @@ function getRoomState(roomId) {
       votes: new Map(), // userId -> vote value
       isRevealed: false,
       facilitatorId: null,
+      story: null,
+      storyUrl: null,
     });
   }
   return rooms.get(roomId);
@@ -74,6 +76,7 @@ module.exports = async function (context, req) {
           await client.sendToConnection(connectionId, {
             type: 'roomState',
             state: {
+              roomId,
               participants: Array.from(roomState.participants.entries()).map(
                 ([id, p]) => ({
                   id,
@@ -86,6 +89,8 @@ module.exports = async function (context, req) {
                 : {},
               isRevealed: roomState.isRevealed,
               facilitatorId: roomState.facilitatorId,
+              story: roomState.story,
+              storyUrl: roomState.storyUrl,
             },
           });
 
@@ -130,12 +135,27 @@ module.exports = async function (context, req) {
           if (userId === roomState.facilitatorId) {
             roomState.votes.clear();
             roomState.isRevealed = false;
+            roomState.story = null;
+            roomState.storyUrl = null;
             for (const participant of roomState.participants.values()) {
               participant.hasVoted = false;
             }
 
             await client.group(roomId).sendToAll({
               type: 'reset',
+            });
+          }
+          break;
+
+        case 'setStory':
+          if (userId === roomState.facilitatorId) {
+            roomState.story = message.story || null;
+            roomState.storyUrl = message.storyUrl || null;
+
+            await client.group(roomId).sendToAll({
+              type: 'storyUpdated',
+              story: roomState.story,
+              storyUrl: roomState.storyUrl,
             });
           }
           break;

@@ -21,6 +21,12 @@ export function useWebPubSub({
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const onMessageRef = useRef(onMessage);
+
+  // onMessageを常に最新に保つ
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   const connect = useCallback(async () => {
     if (!enabled || !userId) return;
@@ -73,10 +79,10 @@ export function useWebPubSub({
           if (data.type === 'message') {
             if (data.from === 'group') {
               console.log('[WS] Group message received:', data.data);
-              onMessage(data.data);
+              onMessageRef.current(data.data);
             } else if (data.from === 'server') {
               console.log('[WS] Server message received:', data.data);
-              onMessage(data.data);
+              onMessageRef.current(data.data);
             }
           } else if (data.type !== 'ack' && data.type !== 'system') {
             console.log('[WS] Message did not match message criteria');
@@ -96,7 +102,7 @@ export function useWebPubSub({
     } catch (e) {
       setError(e instanceof Error ? e : new Error('Unknown error'));
     }
-  }, [roomId, userId, nickname, onMessage, enabled]);
+  }, [roomId, userId, nickname, enabled]);
 
   const send = useCallback((message: ClientMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
