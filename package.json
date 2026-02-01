@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "api": "cd api && func start",
+    "tunnel": "awps-tunnel run --hub poker --upstream \"http://localhost:7071\""
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,7 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@azure/web-pubsub-tunnel-tool": "^1.0.0-beta.11",
     "@eslint/eslintrc": "^3.3.3",
     "@types/node": "^25.1.0",
     "@types/react": "^19.2.10",
