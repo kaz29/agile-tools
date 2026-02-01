@@ -14,17 +14,12 @@ import {
   TextField,
   Button,
   Chip,
-  List,
-  ListItem,
-  ListItemText,
   Alert,
   Stack,
 } from '@mui/material';
 import {
   Group as GroupIcon,
   Star as StarIcon,
-  CheckCircle as CheckCircleIcon,
-  HourglassEmpty as HourglassEmptyIcon,
   Style as StyleIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
@@ -225,51 +220,56 @@ export default function RoomPage({
           {/* 参加者リスト */}
           <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
             <Paper sx={{ p: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <GroupIcon />
                 <Typography variant="h6">
                   参加者 ({participants.length})
                 </Typography>
               </Box>
-              <List dense>
-                {participants.map((p) => (
-                  <ListItem key={p.id}>
-                    <ListItemText
-                      primary={
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {participants.map((p) => {
+                  // 投票状態で色を決定
+                  const getChipColor = () => {
+                    if (isRevealed) {
+                      return votes[p.id] ? 'primary' : 'default';
+                    }
+                    return p.hasVoted ? 'success' : 'default';
+                  };
+
+                  // 投票状態でvariantを決定
+                  const getChipVariant = () => {
+                    if (isRevealed) {
+                      return 'filled';
+                    }
+                    return p.hasVoted ? 'filled' : 'outlined';
+                  };
+
+                  return (
+                    <Chip
+                      key={p.id}
+                      label={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {p.id === facilitatorId && <StarIcon fontSize="small" sx={{ color: 'warning.main' }} />}
+                          {p.id === facilitatorId && <StarIcon fontSize="small" />}
                           <span>{p.nickname}</span>
-                        </Box>
-                      }
-                      secondary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {isRevealed ? (
-                            votes[p.id] || '-'
-                          ) : p.hasVoted ? (
-                            <>
-                              <CheckCircleIcon fontSize="small" sx={{ color: 'success.main' }} />
-                              <span>投票済み</span>
-                            </>
-                          ) : (
-                            <>
-                              <HourglassEmptyIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                              <span>投票待ち</span>
-                            </>
+                          {isRevealed && votes[p.id] && (
+                            <Box component="span" sx={{ ml: 0.5, fontWeight: 'bold' }}>
+                              ({votes[p.id]})
+                            </Box>
                           )}
                         </Box>
                       }
+                      color={getChipColor()}
+                      variant={getChipVariant()}
+                      size="medium"
                     />
-                  </ListItem>
-                ))}
+                  );
+                })}
                 {participants.length === 0 && (
-                  <ListItem>
-                    <ListItemText
-                      primary="参加者を待っています..."
-                      primaryTypographyProps={{ color: 'text.secondary', fontSize: 'small' }}
-                    />
-                  </ListItem>
+                  <Typography variant="body2" color="text.secondary">
+                    参加者を待っています...
+                  </Typography>
                 )}
-              </List>
+              </Box>
             </Paper>
           </Box>
 
