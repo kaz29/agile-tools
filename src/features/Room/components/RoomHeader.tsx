@@ -1,5 +1,11 @@
 import { AppBar, Toolbar, Typography, Chip, Box, IconButton, Tooltip } from '@mui/material';
-import { ContentCopy as ContentCopyIcon } from '@mui/icons-material';
+import {
+  ContentCopy as ContentCopyIcon,
+  AdminPanelSettings as AdminPanelSettingsIcon,
+  Person as PersonIcon,
+  CheckCircle as CheckCircleIcon,
+  Sync as SyncIcon,
+} from '@mui/icons-material';
 
 interface RoomHeaderProps {
   roomId: string;
@@ -46,27 +52,58 @@ export function RoomHeader({ roomId, teamName, isConnected, isHost, onCopyLink }
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Chip
-            label={isConnected ? '接続済み' : '接続中...'}
-            color={isConnected ? 'success' : 'warning'}
-            size="small"
-            sx={{
-              bgcolor: isConnected ? 'success.light' : 'warning.light',
-              color: 'white',
-              fontWeight: 'bold',
-            }}
-          />
-          {isHost && (
+          <Tooltip title={isConnected ? '接続済み' : '接続中...'} arrow>
             <Chip
-              label="ホスト"
+              icon={isConnected ? <CheckCircleIcon /> : <SyncIcon />}
+              color={isConnected ? 'success' : 'warning'}
               size="small"
               sx={{
-                bgcolor: 'secondary.main',
+                bgcolor: isConnected ? 'success.light' : 'warning.light',
                 color: 'white',
                 fontWeight: 'bold',
+                '& .MuiChip-icon': {
+                  color: 'white',
+                  marginLeft: 0,
+                  marginRight: 0,
+                  animation: !isConnected ? 'spin 2s linear infinite' : 'none',
+                },
+                '& .MuiChip-label': {
+                  display: 'none',
+                },
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                '@keyframes spin': {
+                  '0%': {
+                    transform: 'rotate(0deg)',
+                  },
+                  '100%': {
+                    transform: 'rotate(360deg)',
+                  },
+                },
               }}
             />
-          )}
+          </Tooltip>
+          <Tooltip title={isHost ? 'ホスト' : '参加者'} arrow>
+            <Chip
+              icon={isHost ? <AdminPanelSettingsIcon /> : <PersonIcon />}
+              size="small"
+              sx={{
+                bgcolor: isHost ? 'secondary.light' : 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                fontWeight: 'bold',
+                '& .MuiChip-icon': {
+                  color: 'white',
+                  marginLeft: 0,
+                  marginRight: 0,
+                },
+                '& .MuiChip-label': {
+                  display: 'none',
+                },
+                paddingLeft: '12px',
+                paddingRight: '12px',
+              }}
+            />
+          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>
