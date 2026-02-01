@@ -25,12 +25,15 @@ export function RoomPage({ roomId }: RoomPageProps) {
     votes,
     isRevealed,
     facilitatorId,
+    allVotedNotified,
     handleCardSelect,
     handleReveal,
     handleReset,
     handleCopyLink,
     handleJoinRoom,
   } = useRoomState(roomId);
+
+  const allVoted = participants.length > 0 && participants.every((p) => p.hasVoted);
 
   if (isLoading) {
     return <RoomSkeleton />;
@@ -75,6 +78,7 @@ export function RoomPage({ roomId }: RoomPageProps) {
         {isHost && (
           <HostControls
             isRevealed={isRevealed}
+            allVoted={allVoted}
             onReveal={handleReveal}
             onReset={handleReset}
           />

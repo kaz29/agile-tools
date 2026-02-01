@@ -1,21 +1,39 @@
-import { Box, Paper, Button } from '@mui/material';
-import { Visibility as VisibilityIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { Box, Paper, Button, Alert } from '@mui/material';
+import { Visibility as VisibilityIcon, Refresh as RefreshIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 
 interface HostControlsProps {
   isRevealed: boolean;
+  allVoted: boolean;
   onReveal: () => void;
   onReset: () => void;
 }
 
-export function HostControls({ isRevealed, onReveal, onReset }: HostControlsProps) {
+export function HostControls({ isRevealed, allVoted, onReveal, onReset }: HostControlsProps) {
   return (
     <Paper sx={{ p: 2, mb: 2 }}>
+      {allVoted && !isRevealed && (
+        <Alert
+          severity="success"
+          icon={<CheckCircleIcon />}
+          sx={{ mb: 2 }}
+        >
+          全員がカードを選択しました！公開できます
+        </Alert>
+      )}
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         <Button
           variant="contained"
           onClick={onReveal}
           disabled={isRevealed}
+          color={allVoted && !isRevealed ? 'success' : 'primary'}
           startIcon={<VisibilityIcon />}
+          sx={allVoted && !isRevealed ? {
+            animation: 'pulse 2s ease-in-out infinite',
+            '@keyframes pulse': {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.05)' },
+            },
+          } : undefined}
         >
           カードを公開
         </Button>

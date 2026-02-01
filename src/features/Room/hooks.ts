@@ -18,6 +18,7 @@ export function useRoomState(roomId: string) {
   const [votes, setVotes] = useState<Record<string, string>>({});
   const [isRevealed, setIsRevealed] = useState(false);
   const [facilitatorId, setFacilitatorId] = useState<string>('');
+  const [allVotedNotified, setAllVotedNotified] = useState(false);
 
   // セッションストレージからユーザー情報を取得
   useEffect(() => {
@@ -77,6 +78,7 @@ export function useRoomState(roomId: string) {
         setIsRevealed(false);
         setVotes({});
         setSelectedCard(null);
+        setAllVotedNotified(false);
         setParticipants((prev) =>
           prev.map((p) => ({ ...p, hasVoted: false }))
         );
@@ -91,6 +93,20 @@ export function useRoomState(roomId: string) {
     onMessage: handleMessage,
     enabled: !!userInfo,
   });
+
+  // 全員投票完了の検出と通知
+  useEffect(() => {
+    if (isRevealed || participants.length === 0 || allVotedNotified) return;
+
+    const allVoted = participants.every((p) => p.hasVoted);
+    if (allVoted && participants.length > 0) {
+      enqueueSnackbar('全員がカードを選択しました！', {
+        variant: 'success',
+        autoHideDuration: 3000,
+      });
+      setAllVotedNotified(true);
+    }
+  }, [participants, isRevealed, allVotedNotified, enqueueSnackbar]);
 
   // カード選択
   const handleCardSelect = useCallback((card: string) => {
@@ -141,6 +157,7 @@ export function useRoomState(roomId: string) {
     votes,
     isRevealed,
     facilitatorId,
+    allVotedNotified,
     handleCardSelect,
     handleReveal,
     handleReset,
