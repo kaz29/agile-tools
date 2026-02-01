@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Card, CardActionArea, Alert } from '@mui/material';
+import { Box, Typography, Card, CardActionArea, Alert } from '@mui/material';
 import { Style as StyleIcon } from '@mui/icons-material';
 
 const CARDS = ['0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'];
@@ -15,20 +15,31 @@ export function CardSelection({
   onCardSelect,
 }: CardSelectionProps) {
   return (
-    <Paper sx={{ p: 2 }}>
+    <Box sx={{ p: 2, pt: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <StyleIcon />
         <Typography variant="h6">
           カードを選択
         </Typography>
       </Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(5, 1fr)' }, gap: 1 }}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(5, 1fr)',
+          sm: 'repeat(5, 1fr)',
+          md: 'repeat(10, 1fr)'
+        },
+        gap: 1,
+        maxWidth: '100%',
+      }}>
         {CARDS.map((card) => (
           <Box key={card}>
             <Card
               elevation={selectedCard === card ? 8 : 1}
               sx={{
                 aspectRatio: '2/3',
+                maxWidth: '80px',
+                margin: '0 auto',
                 border: selectedCard === card ? 2 : 1,
                 borderColor: selectedCard === card ? 'primary.main' : 'grey.300',
                 bgcolor: selectedCard === card ? 'primary.50' : 'white',
@@ -51,7 +62,7 @@ export function CardSelection({
                 }}
               >
                 <Typography
-                  variant="h4"
+                  variant="h5"
                   component="div"
                   sx={{
                     fontWeight: 'bold',
@@ -70,6 +81,6 @@ export function CardSelection({
           選択: <strong>{selectedCard}</strong>
         </Alert>
       )}
-    </Paper>
+    </Box>
   );
 }

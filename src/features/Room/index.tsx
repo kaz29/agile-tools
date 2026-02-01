@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Stack } from '@mui/material';
+import { Box, Container, Paper } from '@mui/material';
 import { useRoomState } from './hooks';
 import { RoomHeader } from './components/RoomHeader';
 import { ParticipantsList } from './components/ParticipantsList';
@@ -26,6 +26,7 @@ export function RoomPage({ roomId }: RoomPageProps) {
     isRevealed,
     facilitatorId,
     allVotedNotified,
+    teamName,
     handleCardSelect,
     handleReveal,
     handleReset,
@@ -47,32 +48,35 @@ export function RoomPage({ roomId }: RoomPageProps) {
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50' }}>
       <RoomHeader
         roomId={roomId}
+        teamName={teamName}
         isConnected={isConnected}
         isHost={isHost}
         onCopyLink={handleCopyLink}
       />
       <Container maxWidth="lg" sx={{ py: 2 }}>
-
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <Paper sx={{ mb: 2 }}>
           {/* 参加者リスト */}
-          <Box sx={{ width: { xs: '100%', md: '33.333%' } }}>
-            <ParticipantsList
-              participants={participants}
-              votes={votes}
-              isRevealed={isRevealed}
-              facilitatorId={facilitatorId}
-            />
-          </Box>
+          <ParticipantsList
+            participants={participants}
+            votes={votes}
+            isRevealed={isRevealed}
+            facilitatorId={facilitatorId}
+          />
 
           {/* カード選択 */}
-          <Box sx={{ width: { xs: '100%', md: '66.666%' } }}>
-            <CardSelection
-              selectedCard={selectedCard}
-              isRevealed={isRevealed}
-              onCardSelect={handleCardSelect}
-            />
-          </Box>
-        </Stack>
+          <CardSelection
+            selectedCard={selectedCard}
+            isRevealed={isRevealed}
+            onCardSelect={handleCardSelect}
+          />
+        </Paper>
+
+        {/* 結果表示 */}
+        <VotingResults
+          participants={participants}
+          votes={votes}
+          isRevealed={isRevealed}
+        />
 
         {/* ホスト用コントロール */}
         {isHost && (
@@ -83,13 +87,6 @@ export function RoomPage({ roomId }: RoomPageProps) {
             onReset={handleReset}
           />
         )}
-
-        {/* 結果表示 */}
-        <VotingResults
-          participants={participants}
-          votes={votes}
-          isRevealed={isRevealed}
-        />
       </Container>
     </Box>
   );

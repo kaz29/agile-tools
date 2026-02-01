@@ -19,12 +19,14 @@ export function useRoomState(roomId: string) {
   const [isRevealed, setIsRevealed] = useState(false);
   const [facilitatorId, setFacilitatorId] = useState<string>('');
   const [allVotedNotified, setAllVotedNotified] = useState(false);
+  const [teamName, setTeamName] = useState<string | undefined>(undefined);
 
   // セッションストレージからユーザー情報を取得
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem(`room:${roomId}:user`);
       const hostId = sessionStorage.getItem(`room:${roomId}:host`);
+      const savedTeamName = sessionStorage.getItem(`room:${roomId}:teamName`);
 
       if (stored) {
         const info = JSON.parse(stored);
@@ -34,6 +36,11 @@ export function useRoomState(roomId: string) {
           setFacilitatorId(info.userId);
         }
       }
+
+      if (savedTeamName) {
+        setTeamName(savedTeamName);
+      }
+
       setIsLoading(false);
     }
   }, [roomId]);
@@ -158,6 +165,7 @@ export function useRoomState(roomId: string) {
     isRevealed,
     facilitatorId,
     allVotedNotified,
+    teamName,
     handleCardSelect,
     handleReveal,
     handleReset,

@@ -20,7 +20,15 @@ export function HostControls({ isRevealed, allVoted, onReveal, onReset }: HostCo
           全員がカードを選択しました！公開できます
         </Alert>
       )}
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          color="inherit"
+          onClick={onReset}
+          startIcon={<RefreshIcon />}
+        >
+          リセット
+        </Button>
         <Button
           variant="contained"
           onClick={onReveal}
@@ -36,14 +44,6 @@ export function HostControls({ isRevealed, allVoted, onReveal, onReset }: HostCo
           } : undefined}
         >
           カードを公開
-        </Button>
-        <Button
-          variant="contained"
-          color="inherit"
-          onClick={onReset}
-          startIcon={<RefreshIcon />}
-        >
-          リセット
         </Button>
       </Box>
     </Paper>

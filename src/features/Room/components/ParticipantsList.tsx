@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Chip } from '@mui/material';
+import { Box, Typography, Chip, Divider } from '@mui/material';
 import { Group as GroupIcon, Star as StarIcon } from '@mui/icons-material';
 import type { Participant } from '@/types';
 
@@ -30,14 +30,14 @@ export function ParticipantsList({
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <GroupIcon />
         <Typography variant="h6">
           参加者 ({participants.length})
         </Typography>
       </Box>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
         {participants.map((p) => (
           <Chip
             key={p.id}
@@ -63,6 +63,7 @@ export function ParticipantsList({
           </Typography>
         )}
       </Box>
-    </Paper>
+      <Divider />
+    </Box>
   );
 }
