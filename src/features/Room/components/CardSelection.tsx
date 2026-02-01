@@ -16,10 +16,15 @@ export function CardSelection({
 }: CardSelectionProps) {
   return (
     <Box sx={{ p: 2, pt: 0 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <StyleIcon />
-        <Typography variant="h6">
-          カードを選択
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <StyleIcon />
+          <Typography variant="h6">
+            カードを選択
+          </Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          ストーリーの見積もりに最も近いと思うカードを選んでください
         </Typography>
       </Box>
       <Box sx={{
