@@ -1,4 +1,10 @@
 const { WebPubSubServiceClient } = require('@azure/web-pubsub');
+const crypto = require('crypto');
+
+// Azure Functions環境でcryptoをグローバルに設定
+if (typeof global !== 'undefined' && !global.crypto) {
+  global.crypto = crypto;
+}
 
 // インメモリでルーム状態を管理（MVPとして簡易実装）
 const rooms = new Map();
@@ -18,6 +24,21 @@ function getRoomState(roomId) {
 }
 
 module.exports = async function (context, req) {
+  // Web PubSub abuse protection validation
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers['webhook-request-origin'];
+    if (origin) {
+      context.res = {
+        status: 200,
+        headers: {
+          'WebHook-Allowed-Origin': origin,
+          'WebHook-Allowed-Rate': '*',
+        },
+      };
+      return;
+    }
+  }
+
   const connectionString = process.env.WEB_PUBSUB_CONNECTION_STRING;
   if (!connectionString) {
     context.res = { status: 500, body: { error: 'Configuration error' } };
@@ -48,10 +69,24 @@ module.exports = async function (context, req) {
   // ユーザーイベント
   if (eventType === 'azure.webpubsub.user.poker-event') {
     try {
-      const message = req.body;
+      context.log('Raw request body:', req.body);
+      context.log('Request body type:', typeof req.body);
+
+      // Web PubSubはCloudEventsフォーマットでデータを送る
+      // dataフィールドにJSONが文字列として格納されている可能性がある
+      let message = req.body;
+      if (typeof req.body === 'string') {
+        message = JSON.parse(req.body);
+      }
+      // dataフィールドがある場合はそれを使用
+      if (message.data) {
+        message = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
+      }
+
       const roomId = message.group || message.roomId;
 
-      context.log('Received message:', message);
+      context.log('Parsed message:', message);
+      context.log('roomId:', roomId);
 
       if (!roomId) {
         context.res = { status: 400, body: { error: 'roomId required' } };

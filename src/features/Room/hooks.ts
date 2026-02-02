@@ -55,27 +55,57 @@ export function useRoomState(roomId: string) {
 
   // セッションストレージからユーザー情報を取得
   useEffect(() => {
+    let mounted = true;
+
     if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem(`room:${roomId}:user`);
-      const hostId = sessionStorage.getItem(`room:${roomId}:host`);
-      const savedTeamName = sessionStorage.getItem(`room:${roomId}:teamName`);
+      console.log('[Room] Loading sessionStorage for room:', roomId);
+      // 少し遅延させて、sessionStorage の書き込みが確実に完了するのを待つ
+      const timer = setTimeout(() => {
+        if (!mounted) return;
 
-      if (stored) {
-        const info = JSON.parse(stored);
-        setUserInfo(info);
-        if (hostId === info.userId) {
-          setIsHost(true);
-          setFacilitatorId(info.userId);
+        const stored = sessionStorage.getItem(`room:${roomId}:user`);
+        const hostId = sessionStorage.getItem(`room:${roomId}:host`);
+        const savedTeamName = sessionStorage.getItem(`room:${roomId}:teamName`);
+
+        console.log('[Room] SessionStorage loaded:', { stored, hostId, savedTeamName });
+
+        if (stored) {
+          const info = JSON.parse(stored);
+          console.log('[Room] Setting userInfo:', info);
+          setUserInfo(info);
+          if (hostId === info.userId) {
+            console.log('[Room] User is host!');
+            setIsHost(true);
+            setFacilitatorId(info.userId);
+          }
+        } else {
+          console.log('[Room] No userInfo found in sessionStorage');
         }
-      }
 
-      if (savedTeamName) {
-        setTeamName(savedTeamName);
-      }
+        if (savedTeamName) {
+          setTeamName(savedTeamName);
+        }
 
+        // 読み込み処理が完了したらローディング終了
+        console.log('[Room] Loading complete, setIsLoading(false)');
+        setIsLoading(false);
+      }, 100);
+
+      return () => {
+        mounted = false;
+        clearTimeout(timer);
+      };
+    } else {
       setIsLoading(false);
     }
   }, [roomId]);
+
+  // facilitatorId が変更されたときに isHost を更新
+  useEffect(() => {
+    if (userInfo && facilitatorId) {
+      setIsHost(userInfo.userId === facilitatorId);
+    }
+  }, [userInfo, facilitatorId]);
 
   // メッセージハンドラー
   const handleMessage = useCallback((message: ServerMessage) => {
